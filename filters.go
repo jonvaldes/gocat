@@ -7,7 +7,6 @@ import (
 	"regexp"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/nsf/termbox-go"
 
 	"launchpad.net/goyaml"
 )
@@ -32,9 +31,6 @@ var highlights = make(map[*regexp.Regexp]EscapeCode)
 func mustPrint(str string) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			if termbox.IsInit {
-				termbox.Close()
-			}
 			fmt.Println("Error: Could not match filter regexp: ", r, spew.Sdump(filterLines))
 			os.Exit(1)
 		}
