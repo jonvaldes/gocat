@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -18,17 +20,28 @@ func crashIf(err error) {
 	os.Exit(1)
 }
 
-// We store the adb output. In the future we'd like
-// to be able to save/process the whole adb history
+/*
+type Log struct {
+	sync.Mutex
+	lines []string
+}
+var logs map[string]Log
+var logsMutex sync.Mutex
+*/
+
 var lines []string
 var linesMutex sync.Mutex
 
 func main() {
-	readFilters("filters.yaml")
+	readConfig("config.yaml")
+
+	//fmt.Println(adbOneShot("shell ps"))
+
+	//return
 
 	// start reading adb output
 	adbChan := make(chan string, 10000)
-	crashIf(readAdb(adbChan))
+	crashIf(adbNonstop("logcat", adbChan))
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		lineNum := 0
@@ -64,6 +77,10 @@ func main() {
 	go func() {
 		log.Fatal(server.ListenAndServe())
 	}()
+
+	if runtime.GOOS == "darwin" {
+		go exec.Command("open", "http://localhost:10001").Run()
+	}
 
 	for {
 		line := <-adbChan

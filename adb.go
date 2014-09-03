@@ -1,13 +1,19 @@
 package main
 
 import (
+	"io"
 	"os/exec"
+	"strings"
 	"time"
 )
 
-func readAdb(out chan<- string) error {
-	c := exec.Command("adb", "logcat")
-	//c := exec.Command("ping", "www.google.com")
+func adbOneShot(command string) (string, error) {
+	result, err := exec.Command("adb", strings.Split(command, " ")...).Output()
+	return string(result), err
+}
+
+func adbNonstop(command string, out chan<- string) error {
+	c := exec.Command("adb", strings.Split(command, " ")...)
 	o, err := c.StdoutPipe()
 	if err != nil {
 		return err
@@ -22,6 +28,9 @@ func readAdb(out chan<- string) error {
 		var currentLine string
 		for {
 			n, err := o.Read(b)
+			if err == io.EOF {
+				return
+			}
 			crashIf(err)
 
 			if n == 0 {
@@ -36,9 +45,9 @@ func readAdb(out chan<- string) error {
 			}
 		}
 	}()
+
 	go func() {
 		crashIf(c.Wait())
 	}()
-
 	return nil
 }

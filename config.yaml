@@ -1,0 +1,14 @@
+filters:
+    - ^E/
+    - ^W/art
+    - ^./IDTK
+    - ^*has died$
+    - ^./chromium
+    - ^I/DEBUG
+    - ^W/System.err
+    - ^./libc
+    
+highlights:
+  "^I/.*": g
+  "^E/.*": r
+  "^W/.*": y

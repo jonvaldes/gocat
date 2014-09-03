@@ -39,10 +39,10 @@ func mustPrint(str string) bool {
 	for _, r := range filterLines {
 
 		if r.MatchString(str) {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 const keyEscape = 27
@@ -88,7 +88,7 @@ type config struct {
 	Highlights map[string]string
 }
 
-func readFilters(file string) {
+func readConfig(file string) {
 
 	data, err := ioutil.ReadFile(file)
 	crashIf(err)
